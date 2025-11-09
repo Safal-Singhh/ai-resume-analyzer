@@ -18,9 +18,10 @@ export default function Home() {
   const [resumes, setResumes] = useState<Resume[]>([]);
   const [loadingResumes, setLoadingResumes] = useState(false);
 
-  useEffect(() => {
-    if(!auth.isAuthenticated) navigate('/auth?next=/');
-  }, [auth.isAuthenticated])
+  // Removed automatic redirect to allow unauthenticated users to see home page
+  // useEffect(() => {
+  //   if(!auth.isAuthenticated) navigate('/auth?next=/');
+  // }, [auth.isAuthenticated])
 
   useEffect(() => {
     const loadResumes = async () => {
@@ -45,9 +46,11 @@ export default function Home() {
     <section className="main-section">
       <div className="page-heading py-16">
         <h1>Track Your Applications & Resume Ratings</h1>
-        {!loadingResumes && resumes?.length === 0 ? (
+        {!auth.isAuthenticated ? (
+            <h2>Please login to start tracking your resume applications and get AI-powered feedback.</h2>
+        ) : !loadingResumes && resumes?.length === 0 ? (
             <h2>No resumes found. Upload your first resume to get feedback.</h2>
-        ): (
+        ) : (
           <h2>Review your submissions and check AI-powered feedback.</h2>
         )}
       </div>
@@ -57,7 +60,7 @@ export default function Home() {
           </div>
       )}
 
-      {!loadingResumes && resumes.length > 0 && (
+      {!loadingResumes && auth.isAuthenticated && resumes.length > 0 && (
         <div className="resumes-section">
           {resumes.map((resume) => (
               <ResumeCard key={resume.id} resume={resume} />
@@ -67,9 +70,15 @@ export default function Home() {
 
       {!loadingResumes && resumes?.length === 0 && (
           <div className="flex flex-col items-center justify-center mt-10 gap-4">
-            <Link to="/upload" className="primary-button w-fit text-xl font-semibold">
-              Upload Resume
-            </Link>
+            {auth.isAuthenticated ? (
+              <Link to="/upload" className="primary-button w-fit text-xl font-semibold">
+                Upload Resume
+              </Link>
+            ) : (
+              <Link to="/auth?next=/" className="primary-button w-fit text-xl font-semibold">
+                Login to Get Started
+              </Link>
+            )}
           </div>
       )}
     </section>
